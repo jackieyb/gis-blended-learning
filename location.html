@@ -3,7 +3,7 @@
 
 <head>
     <title>
-        Blended Learning Erase App
+        Blended Learning Location App
     </title>
 
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
@@ -68,18 +68,23 @@
     <div id="map"></div>
     <div id="interaction" class="layer_selector">
         <center>
-            <b>Input Feature:</b>
-            <select id="input">
+            <b>Source Layer:</b>
+            <select id="source">
                 <option value="">-select one-</option>
-                <option value="0">grocery stores</option>
-                <option value="1">bus lines</option>
+                <option value="0">boundary</option>
             </select>
             <br /><br />
-            <b>Erase Feature:</b>
-            <select id="erase">
+            <b>Selection Method:</b>
+            <select id="selection">
                 <option value="">-select one-</option>
-                <option value="0">grocery stores</option>
-                <option value="1">bus lines</option>
+                <option value="0">select features from</option>
+            </select>
+            <br /><br />
+            <b>Spatial Relationship:</b>
+            <select id="spatial">
+                <option value="">-select one-</option>
+                <option value="0">intersect</option>
+                <option value="1">completely within</option>
             </select>
             <br /><br />
             <button id="submit" type="button">Update Map</button>
@@ -105,23 +110,23 @@
                 user_name: 'smithgis',
                 type: 'cartodb',
                 sublayers: [{
-                        // grocery buffers
-                        sql: 'SELECT * from grocery_buffers',
-                        cartocss: '#layer {polygon-fill: #1062e8;polygon-opacity: 0.5;}',
+                        // grocery bus erase
+                        sql: 'SELECT * from grocery_bus_erase',
+                        cartocss: '#layer {polygon-fill: #03a325;polygon-opacity: 0.5;}',
                         interactivity: 'cartodb_id'
                     },
                     {
-                        // bus buffers
-                        sql: 'SELECT * from bus_buffers',
-                        cartocss: '#layer {polygon-fill: #03a325;polygon-opacity: 0.5;}',
+                        // municpal outline
+                        sql: 'SELECT * from chicopee_municipal_parcels',
+                        cartocss: '#layer {polygon-fill: #1062e8;polygon-opacity: 0.8;line-color: rgba(0,0,0,1);line-width: 1;line-opacity: 0.8;}',
                         interactivity: 'cartodb_id'
-                    }
+                    }   
                 ]
             };
 
             var sublayer;
             var sublayerList = [];
-            var sublayerNames = ['grocery_buffers', 'bus_buffers'];
+            var sublayerNames = ['grocery_bus_erase', 'chicopee_municipal_parcels'];
             var sublayerColors = ['#1062e8', '#03a325']
             
             // Instantiate new map object, place it in 'map' element
@@ -156,23 +161,29 @@
                     // Update SQL on submit button click
                     $('#submit').on('click', function() {
                         $('#loading').show();
-                        var inputlayerNum = $('#input').val();
-                        var inputlayerName = sublayerNames[inputlayerNum];
-                        var eraselayerNum = $('#erase').val();
-                        var eraselayerName = sublayerNames[eraselayerNum];
-                        var sqlStatement = "SELECT input.cartodb_id, ST_Transform(ST_Difference(input.the_geom, erase.the_geom),3857) the_geom_webmercator FROM " + inputlayerName + " as input, " + eraselayerName + " as erase;";
+                        var sourcelayer = $('#source').val();
+                        var spatiallayer = $('#spatial').val();
+                    
+                        var targetlayerName = sublayerNames[0];
+                        var sourcelayerName = sublayerNames[1];
                         
-                        sublayerList[inputlayerNum].setSQL(sqlStatement)
-                            .setCartoCSS('#layer {polygon-fill: ' + sublayerColors[inputlayerNum] + ';polygon-opacity: 0.5;}');
-                        alert(sublayerColors[inputlayerNum]);
-                        sublayerList[eraselayerNum].setSQL(sqlStatement)
+                        if (spatiallayer == '0'){
+                            var sqlStatement = "SELECT s.cartodb_id, s.the_geom_webmercator FROM " + targetlayerName + " as i, " + sourcelayerName + " as s WHERE ST_Intersects(i.the_geom, s.the_geom);";
+                        } else if (spatiallayer == '1'){
+                            var sqlStatement = "SELECT s.cartodb_id, s.the_geom_webmercator FROM " + targetlayerName + " as i, " + sourcelayerName + " as s WHERE ST_Within(s.the_geom, i.the_geom);";
+                        }
+                        
+                        sublayerList[0].setSQL(sqlStatement)
+                            .setCartoCSS("#layer {polygon-fill: #1062e8;polygon-opacity: 0.8;line-color: rgba(0,0,0,1);line-width: 1;line-opacity: 0.8;}");
+                        
+                        sublayerList[1].setSQL(sqlStatement)
                             .setCartoCSS('#layer {}');
 
                     });
                     // Reset query on button click
                     $('#reset').on('click', function() {
-                        sublayerList[0].setSQL("SELECT * FROM grocery_buffers;").setCartoCSS("#layer {polygon-fill: #1062e8;polygon-opacity: 0.5;}");
-                        sublayerList[1].setSQL("SELECT * FROM bus_buffers;").setCartoCSS("#layer {polygon-fill: #03a325;polygon-opacity: 0.5;}");
+                        sublayerList[0].setSQL("SELECT * FROM grocery_bus_erase;").setCartoCSS("#layer {polygon-fill: #03a325;polygon-opacity: 0.5;}");
+                        sublayerList[1].setSQL("SELECT * FROM chicopee_municipal_parcels;").setCartoCSS("#layer {polygon-fill: #1062e8;polygon-opacity: 0.8;line-color: rgba(0,0,0,1);line-width: 1;line-opacity: 0.8;}");
                     });
                 });
         }

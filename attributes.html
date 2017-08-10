@@ -170,7 +170,7 @@
                 sublayers: [{
                     // municpal outline
                     sql: 'SELECT * from chicopee_municipal_parcels',
-                    cartocss: '#layer {polygon-fill: #2a436e; polygon-opacity: 1; line width: 1; line-color: #FFF; line-opacity: 0.5;}',
+                    cartocss: '#layer {polygon-fill: #1062e8;polygon-opacity: 0.8;line-color: rgba(0,0,0,1);line-width: 1;line-opacity: 0.8;}',
                     interactivity: 'cartodb_id'
                 }]
             };
@@ -197,7 +197,7 @@
                     https: true
                 })
                 .addTo(map)
-                .done(function(layer) {
+                .done(function(layer) {          
                     sublayerList.push(layer.getSubLayer(0));
                     sublayerList[0].show();
                     
