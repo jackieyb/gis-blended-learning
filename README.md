@@ -1,6 +1,6 @@
-# blended learning projects for J-term
+# blended learning projects
 
-Interactive tools built with HTML, CSS, JS, Jquery, and Carto for students in J-term
+Interactive tools built with HTML, CSS, JS, Jquery, and Carto for students learning ArcGIS
 
 ## blended learning project #1
 
@@ -39,3 +39,26 @@ Layers:
 - basemap
 - metro_boston_tracts (displaying median home value)
 - metro_boston_tracts (displaying conserved space per person)
+
+## Attributes
+
+Layers:
+- chicopee_municipal_parcels
+
+Layer is modified by choosing the zoning type and acre size
+
+## Erase
+
+Layers:
+- grocery_buffers
+- bus_buffers
+
+Layers are modified by selecting which layer to erase from the other and then displaying the result
+
+## Location
+
+Layers:
+- grocery_bus_erase
+- chicopee_municipal_parcels
+
+Layers are modified by choosing the parcels that either intersect or are within the boundaries of the grocery_bus_erase buffer
